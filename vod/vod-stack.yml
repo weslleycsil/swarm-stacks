@@ -1,0 +1,125 @@
+version: "3"
+services:
+
+    database:
+        image: mongo:4
+        networks:
+            - backend
+        environment:
+            - MONGO_INITDB_DATABASE=streamingVod
+        volumes:
+            - vod_db:/data/db
+        command: --smallfiles --noprealloc
+        restart: always
+        deploy:
+          resources:
+            limits:
+              cpus: '0.1'
+              memory: 300M
+            reservations:
+              cpus: '0.001'
+              memory: 50M
+
+    web:
+        image: weslleycsil/vod-streaming:1.3.3
+        environment:
+            #- NODE_ENV=production
+            - NODE_ENV=development
+        volumes:
+            - vod_upload:/usr/src/app/uploads/
+            - vod_files:/usr/src/app/files/
+        networks:
+            - traefik_proxy
+            - backend
+            - redis-net
+        depends_on:
+            - database
+        deploy:
+          labels:
+            - "traefik.web.port=8080"
+            - "traefik.kue.port=3001"
+            - "traefik.docker.network=traefik_proxy"
+            - "traefik.web.frontend.rule=Host:${client}.twcreativs.stream; PathPrefixStrip: /api"
+            - "traefik.kue.frontend.rule=Host:${client}.twcreativs.stream; PathPrefixStrip: /kue"
+          resources:
+            limits:
+              cpus: '0.1'
+              memory: 300M
+            reservations:
+              cpus: '0.001'
+              memory: 50M
+
+        command: npm start
+        working_dir: /usr/src/app
+        
+    redis:
+        image: redis:4.0.5-alpine
+        command: ["redis-server", "--appendonly", "yes"]
+        hostname: redis
+        networks:
+          - redis-net
+        volumes:
+          - vod_redis:/data
+        deploy:
+          resources:
+            limits:
+              cpus: '0.5'
+              memory: 300M
+            reservations:
+              cpus: '0.001'
+              memory: 50M
+
+    encoder:
+        image: weslleycsil/encoder-streaming:1.3.3
+        environment:
+            #- NODE_ENV=production
+            - CORES=3
+            - NODE_ENV=development
+        volumes:
+            - vod_upload:/usr/src/app/uploads/
+            - vod_files:/usr/src/app/files/
+        networks:
+            - redis-net
+        command: npm start
+        working_dir: /usr/src/app
+        deploy:
+          resources:
+            limits:
+              cpus: '3.0'
+              memory: 2000M
+            reservations:
+              cpus: '1'
+              memory: 500M
+
+networks:
+    traefik_proxy:
+        external:
+            name: traefik_proxy
+    backend:
+    redis-net:
+
+volumes:
+    vod_upload:
+        driver: local
+        driver_opts:
+          type: nfs
+          o: nfsvers=4,addr=10.10.10.94,rw
+          device: ":/NFS_VOL/HDD/${client}/vod-upload"
+    vod_files:
+        driver: local
+        driver_opts:
+          type: nfs
+          o: nfsvers=4,addr=10.10.10.94,rw
+          device: ":/NFS_VOL/HDD/${client}/vod-files"
+    vod_redis:
+        driver: local
+        driver_opts:
+          type: nfs
+          o: nfsvers=4,addr=10.10.10.94,rw
+          device: ":/NFS_VOL/SSD/${client}/vod-redis"
+    vod_db:
+        driver: local
+        driver_opts:
+          type: nfs
+          o: nfsvers=4,addr=10.10.10.94,rw
+          device: ":/NFS_VOL/SSD/${client}/vod-db"
