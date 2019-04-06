@@ -25,6 +25,7 @@ services:
         environment:
             #- NODE_ENV=production
             - NODE_ENV=development
+            - CLIENT=${client}
         volumes:
             - vod_upload:/usr/src/app/uploads/
             - vod_files:/usr/src/app/files/
