@@ -71,7 +71,7 @@ services:
               memory: 50M
 
     encoder:
-        image: weslleycsil/encoder-streaming:1.4.1
+        image: weslleycsil/encoder-streaming:1.4.2
         environment:
             #- NODE_ENV=production
             - Videos=3
