@@ -26,6 +26,14 @@ services:
             #- NODE_ENV=production
             - NODE_ENV=development
             - CLIENT=${client}
+            - feed=${feed}
+            - firebaseApiKey=${apiKey}
+            - firebaseAuthDomain=${authDomain}
+            - firebaseDatabaseURL=${databaseURL}
+            - firebaseProjectId=${projectId}
+            - firebaseStorageBucket=${storageBucket}
+            - firebaseMsgSenderId=${messagingSenderId}
+            - firebaseAppId=${appId}
         volumes:
             - vod_upload:/usr/src/app/uploads/
             - vod_files:/usr/src/app/files/
