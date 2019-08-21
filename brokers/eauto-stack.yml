@@ -31,7 +31,7 @@ services:
         labels:
           - "traefik.port=1880"
           - "traefik.docker.network=traefik_proxy"
-          - "traefik.frontend.rule=Host:${client}.twcreativs.stream; PathPrefixStrip: /nodered"
+          - "traefik.frontend.rule=Host:nodered.${client}.twcreativs.stream;"
 
 
 networks:
