@@ -1,37 +1,37 @@
 version: "3"
 services:
-mqtt:
-    image: eclipse-mosquitto
-    volumes:
-      - mqtt_data:/mosquitto/data
-      - mqtt_log:/mosquitto/log
-    networks:
-      - backend
-      - traefik_proxy
-    environment:
-      - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
-      - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
-    deploy:
-      labels:
-        - "traefik.port=9001"
-        - "traefik.protocol=ws"
-        - "traefik.docker.network=traefik_proxy"
-        - "traefik.frontend.rule=Host:${client}.twcreativs.stream; PathPrefixStrip: /mqtt"
+  mqtt:
+      image: eclipse-mosquitto
+      volumes:
+        - mqtt_data:/mosquitto/data
+        - mqtt_log:/mosquitto/log
+      networks:
+        - backend
+        - traefik_proxy
+      environment:
+        - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
+        - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
+      deploy:
+        labels:
+          - "traefik.port=9001"
+          - "traefik.protocol=ws"
+          - "traefik.docker.network=traefik_proxy"
+          - "traefik.frontend.rule=Host:${client}.twcreativs.stream; PathPrefixStrip: /mqtt"
 
-nodered:
-    image: nodered/node-red-docker
-    networks:
-      - backend
-      - traefik_proxy
-    volumes:
-      - node_data:/data
-    depends_on:
-      - mqtt
-    deploy:
-      labels:
-        - "traefik.port=1880"
-        - "traefik.docker.network=traefik_proxy"
-        - "traefik.frontend.rule=Host:${client}.twcreativs.stream; PathPrefixStrip: /nodered"
+  nodered:
+      image: nodered/node-red-docker
+      networks:
+        - backend
+        - traefik_proxy
+      volumes:
+        - node_data:/data
+      depends_on:
+        - mqtt
+      deploy:
+        labels:
+          - "traefik.port=1880"
+          - "traefik.docker.network=traefik_proxy"
+          - "traefik.frontend.rule=Host:${client}.twcreativs.stream; PathPrefixStrip: /nodered"
 
 
 networks:
