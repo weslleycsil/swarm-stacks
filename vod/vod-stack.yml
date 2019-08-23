@@ -9,7 +9,6 @@ services:
             - MONGO_INITDB_DATABASE=streamingVod
         volumes:
             - vod_db:/data/db
-        command: --smallfiles --noprealloc
         restart: always
         deploy:
           resources:
