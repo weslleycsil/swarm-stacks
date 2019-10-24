@@ -33,6 +33,11 @@ services:
             - firebaseStorageBucket=${storageBucket}
             - firebaseMsgSenderId=${messagingSenderId}
             - firebaseAppId=${appId}
+            - collection=${collection}
+            - p480_low=${p480_low}
+            - p480=${p480}
+            - p720=${p720}
+            - p1080=${p1080}
         volumes:
             - vod_upload:/usr/src/app/uploads/
             - vod_files:/usr/src/app/files/
