@@ -17,25 +17,16 @@ services:
               memory: 300M
 
     web:
-        image: weslleycsil/vod-streaming:1.4.5
+        image: weslleycsil/vod-streaming:1.7.0
         environment:
-            #- NODE_ENV=production
-            - NODE_ENV=development
+            - NODE_ENV=production
             - CLIENT=${client}
-            - bck=${bck}
-            - feed=${feed}
-            - firebaseApiKey=${apiKey}
-            - firebaseAuthDomain=${authDomain}
-            - firebaseDatabaseURL=${databaseURL}
-            - firebaseProjectId=${projectId}
-            - firebaseStorageBucket=${storageBucket}
-            - firebaseMsgSenderId=${messagingSenderId}
-            - firebaseAppId=${appId}
-            - collection=${collection}
+            - videoApiUrl=${urlApi}
             - p480_low=${p480_low}
             - p480=${p480}
             - p720=${p720}
             - p1080=${p1080}
+            - bck=${bck}
         volumes:
             - vod_upload:/usr/src/app/uploads/
             - vod_files:/usr/src/app/files/
@@ -50,8 +41,8 @@ services:
             - "traefik.web.port=8080"
             - "traefik.kue.port=3001"
             - "traefik.docker.network=traefik_proxy"
-            - "traefik.web.frontend.rule=Host:${client}.twcreativs.stream; PathPrefixStrip: /api"
-            - "traefik.kue.frontend.rule=Host:${client}.twcreativs.stream; PathPrefixStrip: /kue"
+            - "traefik.web.frontend.rule=Host:${client}.${urlsite}; PathPrefixStrip: /api/videos"
+            - "traefik.kue.frontend.rule=Host:${client}.${urlsite}; PathPrefixStrip: /kue"
           resources:
             limits:
               cpus: '0.1'
@@ -61,7 +52,7 @@ services:
         working_dir: /usr/src/app
         
     redis:
-        image: redis:4.0.5-alpine
+        image: redis:buster
         command: ["redis-server", "--appendonly", "yes"]
         hostname: redis
         networks:
@@ -75,12 +66,13 @@ services:
               memory: 300M
 
     encoder:
-        image: weslleycsil/encoder-streaming:1.4.4
+        image: weslleycsil/encoder-streaming:1.4.6
         environment:
-            #- NODE_ENV=production
+            - NODE_ENV=production
+            - CLIENT=${client}
+            - amb=production
             - Videos=3
             - Thumbs=4
-            - NODE_ENV=development
         volumes:
             - vod_upload:/usr/src/app/uploads/
             - vod_files:/usr/src/app/files/
@@ -102,27 +94,33 @@ networks:
     redis-net:
 
 volumes:
+    aod_audios:
+        driver: local
+        driver_opts:
+          type: nfs
+          o: nfsvers=4,addr=10.10.10.93,rw
+          device: ":/NFS_VOL/HDD/${client}/aod-audios"
     vod_upload:
         driver: local
         driver_opts:
           type: nfs
-          o: nfsvers=4,addr=10.10.10.94,rw
+          o: nfsvers=4,addr=10.10.10.93,rw
           device: ":/NFS_VOL/HDD/${client}/vod-upload"
     vod_files:
         driver: local
         driver_opts:
           type: nfs
-          o: nfsvers=4,addr=10.10.10.94,rw
+          o: nfsvers=4,addr=10.10.10.93,rw
           device: ":/NFS_VOL/HDD/${client}/vod-files"
     vod_redis:
         driver: local
         driver_opts:
           type: nfs
-          o: nfsvers=4,addr=10.10.10.94,rw
+          o: nfsvers=4,addr=10.10.10.93,rw
           device: ":/NFS_VOL/SSD/${client}/vod-redis"
     vod_db:
         driver: local
         driver_opts:
           type: nfs
-          o: nfsvers=4,addr=10.10.10.94,rw
+          o: nfsvers=4,addr=10.10.10.93,rw
           device: ":/NFS_VOL/SSD/${client}/vod-db"
