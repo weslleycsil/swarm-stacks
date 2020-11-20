@@ -15,7 +15,6 @@ services:
             limits:
               cpus: '0.1'
               memory: 300M
-
     web:
         image: weslleycsil/vod-streaming:1.7.0
         environment:
@@ -63,8 +62,7 @@ services:
 
         command: npm start
         working_dir: /usr/src/app
-        
-     audio:
+    audio:
         image: weslleycsil/aod-streaming:1.0.1
         environment:
             - NODE_ENV=production
@@ -102,7 +100,6 @@ services:
 
         command: npm start
         working_dir: /usr/src/app
-        
     redis:
         image: redis:buster
         command: ["redis-server", "--appendonly", "yes"]
@@ -129,7 +126,6 @@ services:
             limits:
               cpus: '0.5'
               memory: 300M
-
     encoder:
         image: weslleycsil/encoder-streaming:1.4.6
         environment:
