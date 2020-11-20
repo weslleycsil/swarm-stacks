@@ -37,12 +37,64 @@ services:
         depends_on:
             - database
         deploy:
+          replicas: 1
+          update_config:
+            parallelism: 0
+            order: start-first
+            failure_action: rollback
+            delay: 10s
+          rollback_config:
+            parallelism: 0
+            order: stop-first
+          restart_policy:
+            condition: any
+            delay: 5s
+            window: 120s
           labels:
             - "traefik.web.port=8080"
             - "traefik.kue.port=3001"
             - "traefik.docker.network=traefik_proxy"
             - "traefik.web.frontend.rule=Host:${client}.${urlsite}; PathPrefixStrip: /api/videos"
             - "traefik.kue.frontend.rule=Host:${client}.${urlsite}; PathPrefixStrip: /kue"
+          resources:
+            limits:
+              cpus: '0.1'
+              memory: 300M
+
+        command: npm start
+        working_dir: /usr/src/app
+        
+     audio:
+        image: weslleycsil/aod-streaming:1.0.1
+        environment:
+            - NODE_ENV=production
+            - CLIENT=${client}
+            - bck=${bck}
+        volumes:
+            - aod_audios:/usr/src/app/audios/
+        networks:
+            - traefik_proxy
+            - backend
+        depends_on:
+            - database
+        deploy:
+          replicas: 1
+          update_config:
+            parallelism: 0
+            order: start-first
+            failure_action: rollback
+            delay: 10s
+          rollback_config:
+            parallelism: 0
+            order: stop-first
+          restart_policy:
+            condition: any
+            delay: 5s
+            window: 120s
+          labels:
+            - "traefik.web.port=8080"
+            - "traefik.docker.network=traefik_proxy"
+            - "traefik.web.frontend.rule=Host:${client}.${urlsite}; PathPrefixStrip: /api/audios"
           resources:
             limits:
               cpus: '0.1'
@@ -60,6 +112,19 @@ services:
         volumes:
           - vod_redis:/data
         deploy:
+          replicas: 1
+          update_config:
+            parallelism: 0
+            order: start-first
+            failure_action: rollback
+            delay: 10s
+          rollback_config:
+            parallelism: 0
+            order: stop-first
+          restart_policy:
+            condition: any
+            delay: 5s
+            window: 120s
           resources:
             limits:
               cpus: '0.5'
@@ -81,6 +146,19 @@ services:
         command: npm start
         working_dir: /usr/src/app
         deploy:
+          replicas: 1
+          update_config:
+            parallelism: 0
+            order: start-first
+            failure_action: rollback
+            delay: 10s
+          rollback_config:
+            parallelism: 0
+            order: stop-first
+          restart_policy:
+            condition: any
+            delay: 5s
+            window: 120s
           resources:
             limits:
               cpus: '3.0'
